@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Matpriskollen",
-        "description": "Välj butikerna du vill bevaka. Deras sidor på matpriskollen.se visar veckans erbjudanden och läses högst en gång per uppdateringsintervall. Lägg sedan till varor med **Lägg till vara**.",
+        "description": "Välj butikerna du vill bevaka. Deras sidor på matpriskollen.se visar veckans erbjudanden och läses högst en gång per uppdateringsintervall. Varorna väljer du i sista steget.",
         "data": {
           "cities": "Orter",
           "store_links": "Butikslänkar",
@@ -20,6 +20,20 @@
         "description": "{count} butiker hittades. Välj de du vill bevaka.",
         "data": {
           "stores": "Butiker"
+        }
+      },
+      "products": {
+        "title": "Varor att bevaka",
+        "description": "Vilka varor vill du bevaka? Du kan lägga till fler, eller ändra dessa, senare med **Lägg till vara** på integrationens sida.",
+        "data": {
+          "products": "Varor",
+          "max_price": "Högsta pris per styck",
+          "notify": "Notis till"
+        },
+        "data_description": {
+          "products": "Märken eller varunamn som det står i erbjudandena, kommaseparerade, t.ex. Celsius, Nocco. Lämna tomt för att lägga till varor senare.",
+          "max_price": "Du får en notis när en butik säljer den för det här eller mindre per styck (t.ex. 3 för 36 kr = 12 kr/st). Lämna tomt för att få veta om alla erbjudanden.",
+          "notify": "Enheter eller tjänster som får notisen. Lämna tomt för ingen notis."
         }
       }
     },

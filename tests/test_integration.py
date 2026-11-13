@@ -87,18 +87,18 @@ async def test_config_flow_products_and_sensors(
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {"stores": [COOP, ICA]}
     )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "products"
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"products": "Celsius, Nocco, celsius", "max_price": 12.5, "notify": []},
+    )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"]["stores"] == {COOP: "Coop Tyresö", ICA: "ICA Tyresö"}
     await hass.async_block_till_done()
     entry = hass.config_entries.async_entries(DOMAIN)[0]
+    assert sorted(s.title for s in entry.subentries.values()) == ["Celsius", "Nocco"]
     assert hass.states.get("sensor.matpriskollen_last_fetch") is not None
-
-    assert (await _add_product(hass, entry, "Celsius", 12.5))[
-        "type"
-    ] is FlowResultType.CREATE_ENTRY
-    assert (await _add_product(hass, entry, "Nocco"))[
-        "type"
-    ] is FlowResultType.CREATE_ENTRY
     dup = await _add_product(hass, entry, "celsius")
     assert dup["errors"] == {"name": "already_added"}
 
@@ -212,3 +212,23 @@ async def test_unreachable_site_retries(hass: HomeAssistant, aioclient_mock) -> 
     entry.add_to_hass(hass)
     await hass.config_entries.async_setup(entry.entry_id)
     assert entry.state is config_entries.ConfigEntryState.SETUP_RETRY
+
+
+async def test_setup_without_products(hass: HomeAssistant, aioclient_mock) -> None:
+    _mock_site(aioclient_mock)
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"cities": "", "store_links": [f"{BASE}/butiker/{COOP}"], "update_hours": 24},
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"stores": [COOP]}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"products": "", "notify": []}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    assert not hass.config_entries.async_entries(DOMAIN)[0].subentries

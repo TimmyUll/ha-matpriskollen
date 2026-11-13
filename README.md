@@ -27,7 +27,7 @@ Type one or more towns (for example `Tyresö, Haninge`) and tick the stores you 
 
 **3. Add products**
 
-On the integration page, press **Add product**. For each product enter:
+The last setup step asks which products to follow (comma-separated, e.g. `Celsius, Nocco`). Later you can add more with **Add product** on the integration page. For each product you set:
 
 - **Product**: the brand or name as written in the offer, e.g. `Celsius`.
 - **Max price per item** (optional): you are notified, and *Under price limit* turns on, when an offer costs this or less per item. Multi-buy offers like *3 för 36,00* count as 12,00 per item, and packs like *24x33 cl* are divided by the pack size.

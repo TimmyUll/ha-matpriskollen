@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Matpriskollen",
-        "description": "Choose the stores to follow. Their pages on matpriskollen.se list this week's offers and are read at most once per update interval. Add products afterwards with **Add product**.",
+        "description": "Choose the stores to follow. Their pages on matpriskollen.se list this week's offers and are read at most once per update interval. Products are chosen in the last step.",
         "data": {
           "cities": "Towns",
           "store_links": "Store links",
@@ -20,6 +20,20 @@
         "description": "{count} stores found. Choose the ones to follow.",
         "data": {
           "stores": "Stores"
+        }
+      },
+      "products": {
+        "title": "Products to follow",
+        "description": "Which products do you want to follow? You can add more, or change these, later with **Add product** on the integration page.",
+        "data": {
+          "products": "Products",
+          "max_price": "Max price per item",
+          "notify": "Notify"
+        },
+        "data_description": {
+          "products": "Comma-separated brand or product names as written in the offers, e.g. Celsius, Nocco. Leave empty to add products later.",
+          "max_price": "You are notified when a store sells it for this or less per item (e.g. 3 for 36 kr = 12 kr each). Leave empty to hear about every offer.",
+          "notify": "Devices or services that get the notification. Leave empty for no notification."
         }
       }
     },

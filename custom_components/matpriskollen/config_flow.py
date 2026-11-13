@@ -33,6 +33,7 @@ from .const import (
     CONF_MAX_PRICE,
     CONF_NAME,
     CONF_NOTIFY,
+    CONF_PRODUCTS,
     CONF_STORE_LINKS,
     CONF_STORES,
     CONF_UPDATE_HOURS,
@@ -121,6 +122,47 @@ async def _search(
     return found, errors
 
 
+def _product_schema(
+    hass: HomeAssistant, defaults: dict[str, Any], name_key: str | None
+) -> vol.Schema:
+    """Name (when adding), price limit and notify targets."""
+    services = sorted(
+        f"notify.{s}"
+        for s in hass.services.async_services_for_domain("notify")
+        if s not in SKIP_NOTIFY
+    )
+    services += [s for s in defaults.get(CONF_NOTIFY, []) if s not in services]
+    schema: dict = {}
+    if name_key == CONF_NAME:
+        schema[vol.Required(CONF_NAME)] = TextSelector()
+    elif name_key:
+        schema[vol.Optional(name_key, default="")] = TextSelector()
+    schema[vol.Optional(CONF_MAX_PRICE)] = NumberSelector(
+        NumberSelectorConfig(
+            min=0,
+            max=10000,
+            step=0.5,
+            mode=NumberSelectorMode.BOX,
+            unit_of_measurement="kr/st",
+        )
+    )
+    schema[vol.Optional(CONF_NOTIFY, default=[])] = SelectSelector(
+        SelectSelectorConfig(
+            options=services, multiple=True, mode=SelectSelectorMode.DROPDOWN
+        )
+    )
+    return vol.Schema(schema)
+
+
+def _product_data(name: str, user_input: dict[str, Any]) -> dict[str, Any]:
+    max_price = user_input.get(CONF_MAX_PRICE)
+    return {
+        CONF_NAME: name,
+        CONF_MAX_PRICE: float(max_price) if max_price not in (None, "") else None,
+        CONF_NOTIFY: list(user_input.get(CONF_NOTIFY, [])),
+    }
+
+
 class MatpriskollenConfigFlow(ConfigFlow, domain=DOMAIN):
     """Set up Matpriskollen: choose stores."""
 
@@ -129,6 +171,7 @@ class MatpriskollenConfigFlow(ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         self._input: dict[str, Any] = {}
         self._found: dict[str, str] = {}
+        self._stores: dict[str, str] = {}
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -159,16 +202,38 @@ class MatpriskollenConfigFlow(ConfigFlow, domain=DOMAIN):
                 if slug in self._found
             }
             if stores:
-                return self.async_create_entry(
-                    title=TITLE,
-                    data={CONF_STORES: stores},
-                    options={CONF_UPDATE_HOURS: int(self._input[CONF_UPDATE_HOURS])},
-                )
+                self._stores = stores
+                return await self.async_step_products()
         return self.async_show_form(
             step_id="stores",
             data_schema=_stores_schema(self._found, list(self._found)),
             errors={"base": "no_stores_selected"} if user_input is not None else {},
             description_placeholders={"count": str(len(self._found))},
+        )
+
+    async def async_step_products(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """First products to follow, comma-separated, with one price limit and notify list."""
+        if user_input is not None:
+            names = _cities(user_input.get(CONF_PRODUCTS))
+            return self.async_create_entry(
+                title=TITLE,
+                data={CONF_STORES: self._stores},
+                options={CONF_UPDATE_HOURS: int(self._input[CONF_UPDATE_HOURS])},
+                subentries=[
+                    {
+                        "subentry_type": SUBENTRY_PRODUCT,
+                        "title": name,
+                        "data": _product_data(name, user_input),
+                        "unique_id": None,
+                    }
+                    for name in names
+                ],
+            )
+        return self.async_show_form(
+            step_id="products",
+            data_schema=_product_schema(self.hass, {}, CONF_PRODUCTS),
         )
 
     @staticmethod
@@ -242,39 +307,14 @@ class ProductSubentryFlow(ConfigSubentryFlow):
     """Add or change a product: name, price limit and who gets notified."""
 
     def _schema(self, defaults: dict[str, Any]) -> vol.Schema:
-        services = sorted(
-            f"notify.{s}"
-            for s in self.hass.services.async_services_for_domain("notify")
-            if s not in SKIP_NOTIFY
+        name_key = CONF_NAME if self.source == "user" else None
+        return self.add_suggested_values_to_schema(
+            _product_schema(self.hass, defaults, name_key), defaults
         )
-        services += [s for s in defaults.get(CONF_NOTIFY, []) if s not in services]
-        schema: dict = {}
-        if self.source == "user":
-            schema[vol.Required(CONF_NAME)] = TextSelector()
-        schema[vol.Optional(CONF_MAX_PRICE)] = NumberSelector(
-            NumberSelectorConfig(
-                min=0,
-                max=10000,
-                step=0.5,
-                mode=NumberSelectorMode.BOX,
-                unit_of_measurement="kr/st",
-            )
-        )
-        schema[vol.Optional(CONF_NOTIFY, default=[])] = SelectSelector(
-            SelectSelectorConfig(
-                options=services, multiple=True, mode=SelectSelectorMode.DROPDOWN
-            )
-        )
-        return self.add_suggested_values_to_schema(vol.Schema(schema), defaults)
 
     @staticmethod
     def _data(name: str, user_input: dict[str, Any]) -> dict[str, Any]:
-        max_price = user_input.get(CONF_MAX_PRICE)
-        return {
-            CONF_NAME: name,
-            CONF_MAX_PRICE: float(max_price) if max_price not in (None, "") else None,
-            CONF_NOTIFY: list(user_input.get(CONF_NOTIFY, [])),
-        }
+        return _product_data(name, user_input)
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None

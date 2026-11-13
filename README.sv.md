@@ -27,7 +27,7 @@ Skriv en eller flera orter (till exempel `Tyresö, Haninge`) och bocka i butiker
 
 **3. Lägg till varor**
 
-På integrationens sida, tryck **Lägg till vara**. Fyll i för varje vara:
+Sista steget i installationen frågar vilka varor du vill bevaka (kommaseparerat, t.ex. `Celsius, Nocco`). Fler lägger du till senare med **Lägg till vara** på integrationens sida. För varje vara anger du:
 
 - **Vara**: märket eller namnet som det står i erbjudandet, t.ex. `Celsius`.
 - **Högsta pris per styck** (valfritt): du får en notis, och *Under prisgräns* slås på, när ett erbjudande kostar detta eller mindre per styck. Mängdpriser som *3 för 36,00* räknas som 12,00 kr/st, och flak som *24x33 cl* delas med antalet.
