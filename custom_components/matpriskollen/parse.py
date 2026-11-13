@@ -22,6 +22,8 @@ PRICE_RE = re.compile(
 )
 # Units that mean "per item or package". Weight and volume prices (/kg, /l) are skipped.
 ITEM_UNITS = {"st", "frp", "förp", "pkt", "flak"}
+# "3 för 2" (take three, pay for two) when the store shows it next to the item price.
+TAKE_PAY_RE = re.compile(r"(\d+) för (\d+)\s*$")
 PACK_RE = re.compile(r"(\d+) ?(?:[x×] ?\d|-?pack)", re.IGNORECASE)
 
 STORE_LINK_RE = re.compile(
@@ -91,7 +93,15 @@ def find_offers(text: str, product: str) -> list[Offer]:
     offers: list[Offer] = []
     for size, price in offer_pattern(product).findall(text):
         size = " ".join(size.split())
+        take_pay = TAKE_PAY_RE.search(size)
+        if take_pay:
+            size = size[: take_pay.start()].strip()
         each, pack = unit_price(price, size)
+        if take_pay and each is not None:
+            take, pay = int(take_pay[1]), int(take_pay[2])
+            if 0 < pay < take:
+                each = round(each * pay / take, 2)
+                price = f"{take} för {pay}, {price}"
         offer = Offer(price=price, size=size, unit_price=each, pack=pack)
         if offer not in offers:
             offers.append(offer)

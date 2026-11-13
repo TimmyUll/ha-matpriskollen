@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 DOMAIN = "matpriskollen"
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 
 BASE_URL = "https://matpriskollen.se"
 USER_AGENT = f"HomeAssistant-Matpriskollen/{VERSION} (+https://github.com/TimmyUll/ha-matpriskollen)"

@@ -30,7 +30,7 @@ Type one or more towns (for example `Tyresö, Haninge`) and tick the stores you 
 The last setup step asks which products to follow (comma-separated, e.g. `Celsius, Nocco`). Later you can add more with **Add product** on the integration page. For each product you set:
 
 - **Product**: the brand or name as written in the offer, e.g. `Celsius`.
-- **Max price per item** (optional): you are notified, and *Under price limit* turns on, when an offer costs this or less per item. Multi-buy offers like *3 för 36,00* count as 12,00 per item, and packs like *24x33 cl* are divided by the pack size.
+- **Max price per item** (optional): you are notified, and *Under price limit* turns on, when an offer costs this or less per item. Multi-buy offers like *3 för 36,00* count as 12,00 per item, packs like *24x33 cl* are divided by the pack size, and *3 för 2* next to a price per item counts as two thirds of it.
 - **Notify**: the phones or other notify services that should get a message.
 
 When you add a product, it is checked against this week's pages of your stores: you see how many offers there are and the cheapest one, or similar names if it was not found (e.g. *Celcius* → *Celsius*).

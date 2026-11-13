@@ -74,3 +74,11 @@ def test_slugs():
     assert store_slug(f"https://matpriskollen.se/butiker/{slug}") == slug
     assert store_slug(slug) == slug
     assert store_slug("https://example.com") is None
+
+
+def test_take_three_pay_for_two() -> None:
+    text = "Energidryck, burkCelsius, 35,5 cl3 för 2 18,90/stCoop Tyresö"
+    (offer,) = find_offers(text, "Celsius")
+    assert offer.size == "35,5 cl"
+    assert offer.unit_price == 12.6
+    assert offer.text == "3 för 2, 18,90/st"
