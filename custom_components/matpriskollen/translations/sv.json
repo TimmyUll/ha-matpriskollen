@@ -11,7 +11,7 @@
         },
         "data_description": {
           "cities": "Skilj med komma, t.ex. Tyresö, Haninge. Alla butiker på orterna visas i nästa steg.",
-          "store_links": "Valfritt. Länkar till butikssidor, t.ex. https://matpriskollen.se/butiker/coop-tyreso--….",
+          "store_links": "Valfritt. Länkar till butikssidor, t.ex. matpriskollen.se/butiker/coop-tyreso--….",
           "update_hours": "Erbjudandena byts en gång i veckan, så en gång per dygn (24) räcker. Minst 6."
         }
       },
@@ -24,7 +24,7 @@
       }
     },
     "error": {
-      "bad_link": "En butikslänk ser ut som https://matpriskollen.se/butiker/namn--id.",
+      "bad_link": "En butikslänk ser ut som matpriskollen.se/butiker/namn--id.",
       "cannot_connect": "Kunde inte läsa matpriskollen.se. Försök igen senare.",
       "no_stores": "Inga butiker hittades. Skriv orter eller butikslänkar.",
       "no_stores_selected": "Välj minst en butik."
@@ -42,7 +42,7 @@
         },
         "data_description": {
           "cities": "Valfritt. Orter, skilda med komma, vars butiker läggs till i listan i nästa steg.",
-          "store_links": "Valfritt. Länkar till butikssidor, t.ex. https://matpriskollen.se/butiker/coop-tyreso--….",
+          "store_links": "Valfritt. Länkar till butikssidor, t.ex. matpriskollen.se/butiker/coop-tyreso--….",
           "update_hours": "Erbjudandena byts en gång i veckan, så en gång per dygn (24) räcker. Minst 6."
         }
       },
@@ -55,7 +55,7 @@
       }
     },
     "error": {
-      "bad_link": "En butikslänk ser ut som https://matpriskollen.se/butiker/namn--id.",
+      "bad_link": "En butikslänk ser ut som matpriskollen.se/butiker/namn--id.",
       "cannot_connect": "Kunde inte läsa matpriskollen.se. Försök igen senare.",
       "no_stores": "Inga butiker hittades. Skriv orter eller butikslänkar.",
       "no_stores_selected": "Välj minst en butik."

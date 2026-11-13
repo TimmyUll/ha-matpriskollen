@@ -11,7 +11,7 @@
         },
         "data_description": {
           "cities": "Comma-separated, e.g. Tyresö, Haninge. All stores in these towns are listed in the next step.",
-          "store_links": "Optional. Links to store pages, e.g. https://matpriskollen.se/butiker/coop-tyreso--….",
+          "store_links": "Optional. Links to store pages, e.g. matpriskollen.se/butiker/coop-tyreso--….",
           "update_hours": "Offers change once a week, so once a day (24) is enough. At least 6."
         }
       },
@@ -24,7 +24,7 @@
       }
     },
     "error": {
-      "bad_link": "A store link should look like https://matpriskollen.se/butiker/name--id.",
+      "bad_link": "A store link should look like matpriskollen.se/butiker/name--id.",
       "cannot_connect": "Could not read matpriskollen.se. Try again later.",
       "no_stores": "No stores found. Enter towns or store links.",
       "no_stores_selected": "Choose at least one store."
@@ -42,7 +42,7 @@
         },
         "data_description": {
           "cities": "Optional. Comma-separated towns whose stores are added to the list in the next step.",
-          "store_links": "Optional. Links to store pages, e.g. https://matpriskollen.se/butiker/coop-tyreso--….",
+          "store_links": "Optional. Links to store pages, e.g. matpriskollen.se/butiker/coop-tyreso--….",
           "update_hours": "Offers change once a week, so once a day (24) is enough. At least 6."
         }
       },
@@ -55,7 +55,7 @@
       }
     },
     "error": {
-      "bad_link": "A store link should look like https://matpriskollen.se/butiker/name--id.",
+      "bad_link": "A store link should look like matpriskollen.se/butiker/name--id.",
       "cannot_connect": "Could not read matpriskollen.se. Try again later.",
       "no_stores": "No stores found. Enter towns or store links.",
       "no_stores_selected": "Choose at least one store."
