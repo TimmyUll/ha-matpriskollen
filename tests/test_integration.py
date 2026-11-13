@@ -64,6 +64,10 @@ async def _add_product(hass, entry, name, max_price=None, notify=None):
     result = await hass.config_entries.subentries.async_configure(
         result["flow_id"], data
     )
+    if result.get("step_id") in ("found", "mentioned", "not_found"):
+        result = await hass.config_entries.subentries.async_configure(
+            result["flow_id"], {"name": name}
+        )
     await hass.async_block_till_done()
     return result
 
@@ -232,3 +236,40 @@ async def test_setup_without_products(hass: HomeAssistant, aioclient_mock) -> No
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
     assert not hass.config_entries.async_entries(DOMAIN)[0].subentries
+
+
+async def test_add_product_checks_name(hass: HomeAssistant, aioclient_mock) -> None:
+    _mock_site(aioclient_mock)
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="Matpriskollen",
+        data={"stores": {COOP: "Coop Tyresö", ICA: "ICA Tyresö"}},
+    )
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    flows = hass.config_entries.subentries
+    result = await flows.async_init(
+        (entry.entry_id, "product"), context={"source": config_entries.SOURCE_USER}
+    )
+    result = await flows.async_configure(
+        result["flow_id"], {"name": "Celcius", "max_price": 12, "notify": []}
+    )
+    assert result["step_id"] == "not_found"
+    assert result["description_placeholders"]["similar"] == "Celsius"
+
+    # Correct the spelling on the check form.
+    result = await flows.async_configure(result["flow_id"], {"name": "Celsius"})
+    assert result["step_id"] == "found"
+    assert result["description_placeholders"]["count"] == "2"
+    assert result["description_placeholders"]["best"] == (
+        "12,00 kr/st på Coop Tyresö (3 för 36,00)"
+    )
+    result = await flows.async_configure(result["flow_id"], {"name": "Celsius"})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    sub = next(iter(entry.subentries.values()))
+    assert sub.title == "Celsius"
+    assert sub.data["max_price"] == 12.0
+    assert hass.states.get("binary_sensor.celsius_under_price_limit").state == "on"

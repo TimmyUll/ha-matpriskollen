@@ -316,28 +316,86 @@ class ProductSubentryFlow(ConfigSubentryFlow):
     def _data(name: str, user_input: dict[str, Any]) -> dict[str, Any]:
         return _product_data(name, user_input)
 
+    _pending: dict[str, Any]
+
+    def _name_error(self, name: str) -> str | None:
+        existing = {
+            s.data.get(CONF_NAME, s.title).lower()
+            for s in self._get_entry().subentries.values()
+            if s.subentry_type == SUBENTRY_PRODUCT
+        }
+        if not name:
+            return "no_name"
+        if name.lower() in existing:
+            return "already_added"
+        return None
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> SubentryFlowResult:
         errors: dict[str, str] = {}
         if user_input is not None:
             name = " ".join(str(user_input.get(CONF_NAME, "")).split())
-            existing = {
-                s.data.get(CONF_NAME, s.title).lower()
-                for s in self._get_entry().subentries.values()
-                if s.subentry_type == SUBENTRY_PRODUCT
-            }
-            if not name:
-                errors[CONF_NAME] = "no_name"
-            elif name.lower() in existing:
-                errors[CONF_NAME] = "already_added"
+            if error := self._name_error(name):
+                errors[CONF_NAME] = error
             else:
-                return self.async_create_entry(
-                    title=name, data=self._data(name, user_input)
-                )
+                self._pending = {**user_input, CONF_NAME: name}
+                return await self.async_step_check()
         return self.async_show_form(
             step_id="user", data_schema=self._schema(user_input or {}), errors=errors
         )
+
+    async def async_step_check(
+        self, user_input: dict[str, Any] | None = None
+    ) -> SubentryFlowResult:
+        """Show what this week's store pages say about the name before adding it."""
+        name = self._pending[CONF_NAME]
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            new = " ".join(str(user_input.get(CONF_NAME, "")).split())
+            if not new or new == name:
+                return self.async_create_entry(
+                    title=name, data=_product_data(name, self._pending)
+                )
+            if error := self._name_error(new):
+                errors[CONF_NAME] = error
+            else:
+                name = self._pending[CONF_NAME] = new
+
+        coordinator = getattr(self._get_entry(), "runtime_data", None)
+        found = (
+            coordinator.data.lookup(name) if coordinator and coordinator.data else None
+        )
+        if found is None:
+            # No saved pages to check against yet.
+            return self.async_create_entry(
+                title=name, data=_product_data(name, self._pending)
+            )
+        placeholders = {"product": name, "count": str(len(found.offers))}
+        if found.offers:
+            step = "found"
+            placeholders["best"] = found.offers[0].summary
+            placeholders["stores"] = ", ".join(
+                dict.fromkeys(o.store for o in found.offers)
+            )
+        elif found.stores:
+            step = "mentioned"
+            placeholders["stores"] = ", ".join(found.stores)
+        else:
+            step = "not_found"
+            placeholders["similar"] = ", ".join(found.similar) or "-"
+        schema = vol.Schema({vol.Optional(CONF_NAME, default=name): TextSelector()})
+        return self.async_show_form(
+            step_id=step,
+            data_schema=schema,
+            errors=errors,
+            description_placeholders=placeholders,
+            last_step=True,
+        )
+
+    async_step_found = async_step_check
+    async_step_mentioned = async_step_check
+    async_step_not_found = async_step_check
 
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None

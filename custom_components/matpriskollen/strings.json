@@ -109,6 +109,27 @@
             "max_price": "You get a notification when a store sells it for this or less per item (for example 3 for 36 kr = 12 kr each). Leave empty to be told about every offer.",
             "notify": "Devices or services that get the notification. Leave empty for no notification."
           }
+        },
+        "found": {
+          "title": "{product} found",
+          "description": "Matpriskollen has **{count}** offers on **{product}** in your stores this week.\n\nCheapest: {best}\n\nStores: {stores}\n\nPress **Submit** to follow it, or change the name to check another.",
+          "data": {
+            "name": "Product"
+          }
+        },
+        "mentioned": {
+          "title": "{product} found, no price per item",
+          "description": "**{product}** is on the store pages this week ({stores}), but without a price per item (for example a price per kg). It can still be followed, but it will not count as under the price limit.\n\nPress **Submit** to follow it, or change the name to check another.",
+          "data": {
+            "name": "Product"
+          }
+        },
+        "not_found": {
+          "title": "{product} not found this week",
+          "description": "No store you follow mentions **{product}** this week. There may simply be no offer right now, or the name may be spelled differently in the offers.\n\nSimilar names in your stores: {similar}\n\nPress **Submit** to follow it anyway, or change the name to check again.",
+          "data": {
+            "name": "Product"
+          }
         }
       },
       "error": {

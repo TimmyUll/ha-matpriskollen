@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import asdict, dataclass
+from difflib import get_close_matches
 
 from bs4 import BeautifulSoup
 
@@ -157,3 +158,18 @@ def city_slug(city: str) -> str:
 def format_kr(value: float) -> str:
     """12.0 -> "12,00"."""
     return f"{value:.2f}".replace(".", ",")
+
+
+WORD_RE = re.compile(rf"[{UPPER}]?[a-zåäöéü]+(?:-[{UPPER}a-zåäöéü]+)*|[{UPPER}]{{2,}}")
+
+
+def similar_names(texts: list[str], name: str, limit: int = 3) -> list[str]:
+    """Words in the store pages that look like a misspelling of the name."""
+    words: dict[str, str] = {}
+    for text in texts:
+        for word in WORD_RE.findall(text):
+            if len(word) > 2:
+                words.setdefault(word.lower(), word)
+    target = name.lower()
+    matches = get_close_matches(target, list(words), n=limit + 1, cutoff=0.75)
+    return [words[m] for m in matches if m != target][:limit]

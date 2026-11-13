@@ -109,6 +109,27 @@
             "max_price": "Du får en notis när en butik säljer den för det här eller mindre per styck (t.ex. 3 för 36 kr = 12 kr/st). Lämna tomt för att få veta om alla erbjudanden.",
             "notify": "Enheter eller tjänster som får notisen. Lämna tomt för ingen notis."
           }
+        },
+        "found": {
+          "title": "{product} hittades",
+          "description": "Matpriskollen har **{count}** erbjudanden på **{product}** i dina butiker denna vecka.\n\nBilligast: {best}\n\nButiker: {stores}\n\nTryck **Bekräfta** för att bevaka den, eller ändra namnet för att kontrollera en annan.",
+          "data": {
+            "name": "Vara"
+          }
+        },
+        "mentioned": {
+          "title": "{product} hittades, utan styckpris",
+          "description": "**{product}** finns på butikssidorna denna vecka ({stores}), men utan pris per styck (till exempel kilopris). Den kan bevakas ändå, men hamnar aldrig under prisgränsen.\n\nTryck **Bekräfta** för att bevaka den, eller ändra namnet för att kontrollera en annan.",
+          "data": {
+            "name": "Vara"
+          }
+        },
+        "not_found": {
+          "title": "{product} hittades inte denna vecka",
+          "description": "Ingen av dina butiker nämner **{product}** denna vecka. Det kanske inte finns något erbjudande just nu, eller så stavas namnet annorlunda i erbjudandena.\n\nLiknande namn i dina butiker: {similar}\n\nTryck **Bekräfta** för att bevaka den ändå, eller ändra namnet för att kontrollera igen.",
+          "data": {
+            "name": "Vara"
+          }
         }
       },
       "error": {

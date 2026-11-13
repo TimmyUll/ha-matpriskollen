@@ -27,7 +27,7 @@ from .const import (
     REQUEST_DELAY,
     SUBENTRY_PRODUCT,
 )
-from .parse import Offer, find_offers, format_kr
+from .parse import Offer, find_offers, format_kr, similar_names
 
 _LOGGER = logging.getLogger(__name__)
 STORAGE_VERSION = 1
@@ -82,6 +82,7 @@ class StoreResult:
     offers: dict[str, list[Offer]] = field(default_factory=dict)
     fetched: datetime | None = None
     ok: bool = False
+    text: str = ""
 
 
 @dataclass
@@ -95,6 +96,15 @@ class BestOffer:
     @property
     def summary(self) -> str:
         return f"{format_kr(self.offer.unit_price)} kr/st på {self.store} ({self.offer.text})"
+
+
+@dataclass
+class Lookup:
+    """A product name checked against the saved store pages."""
+
+    offers: list[BestOffer]
+    stores: list[str]
+    similar: list[str]
 
 
 @dataclass
@@ -117,6 +127,24 @@ class MatpriskollenData:
     def best(self, product: str) -> BestOffer | None:
         offers = self.offers(product)
         return offers[0] if offers else None
+
+    def lookup(self, name: str) -> Lookup | None:
+        """What this week's store pages say about a product name, None if no pages are saved."""
+        pages = [s for s in self.stores.values() if s.text]
+        if not pages:
+            return None
+        offers = sorted(
+            (
+                BestOffer(store=s.name, url=s.url, offer=o)
+                for s in pages
+                for o in find_offers(s.text, name)
+                if o.unit_price is not None
+            ),
+            key=lambda b: (b.offer.unit_price, b.store),
+        )
+        mentioned = [s.name for s in pages if name.lower() in s.text.lower()]
+        similar = [] if mentioned else similar_names([s.text for s in pages], name)
+        return Lookup(offers=offers, stores=mentioned, similar=similar)
 
     @property
     def stores_ok(self) -> int:
@@ -172,7 +200,10 @@ class MatpriskollenCoordinator(DataUpdateCoordinator[MatpriskollenData]):
                 },
                 fetched=dt_util.parse_datetime(s.get("fetched") or ""),
                 ok=s.get("ok", False),
+                text=s.get("text", ""),
             )
+            if stores[slug].ok and not stores[slug].text:
+                return None  # Saved by an older version: read the pages again.
         if set(stores) != set(self.stores):
             return None
         return MatpriskollenData(stores=stores, fetched=fetched)
@@ -193,6 +224,7 @@ class MatpriskollenCoordinator(DataUpdateCoordinator[MatpriskollenData]):
                         },
                         "fetched": s.fetched.isoformat() if s.fetched else None,
                         "ok": s.ok,
+                        "text": s.text,
                     }
                     for slug, s in data.stores.items()
                 },
@@ -227,6 +259,7 @@ class MatpriskollenCoordinator(DataUpdateCoordinator[MatpriskollenData]):
                     offers=old.offers if old else {},
                     fetched=old.fetched if old else None,
                     ok=False,
+                    text=old.text if old else "",
                 )
                 continue
             stores[slug] = StoreResult(
@@ -235,6 +268,7 @@ class MatpriskollenCoordinator(DataUpdateCoordinator[MatpriskollenData]):
                 offers={p: find_offers(page.text, p) for p in names},
                 fetched=dt_util.utcnow(),
                 ok=True,
+                text=page.text,
             )
 
         if self.stores and not any(s.ok for s in stores.values()):
