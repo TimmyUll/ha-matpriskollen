@@ -1,0 +1,127 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Matpriskollen",
+        "description": "Choose the stores to follow. Their pages on matpriskollen.se list this week's offers and are read at most once per update interval. Add products afterwards with **Add product**.",
+        "data": {
+          "cities": "Towns",
+          "store_links": "Store links",
+          "update_hours": "Hours between updates"
+        },
+        "data_description": {
+          "cities": "Comma-separated, e.g. Tyresö, Haninge. All stores in these towns are listed in the next step.",
+          "store_links": "Optional. Links to store pages, e.g. https://matpriskollen.se/butiker/coop-tyreso--….",
+          "update_hours": "Offers change once a week, so once a day (24) is enough. At least 6."
+        }
+      },
+      "stores": {
+        "title": "Choose stores",
+        "description": "{count} stores found. Choose the ones to follow.",
+        "data": {
+          "stores": "Stores"
+        }
+      }
+    },
+    "error": {
+      "bad_link": "A store link should look like https://matpriskollen.se/butiker/name--id.",
+      "cannot_connect": "Could not read matpriskollen.se. Try again later.",
+      "no_stores": "No stores found. Enter towns or store links.",
+      "no_stores_selected": "Choose at least one store."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Matpriskollen",
+        "description": "Change how often pages are read. Enter towns or store links to add more stores.",
+        "data": {
+          "cities": "Towns",
+          "store_links": "Store links",
+          "update_hours": "Hours between updates"
+        },
+        "data_description": {
+          "cities": "Optional. Comma-separated towns whose stores are added to the list in the next step.",
+          "store_links": "Optional. Links to store pages, e.g. https://matpriskollen.se/butiker/coop-tyreso--….",
+          "update_hours": "Offers change once a week, so once a day (24) is enough. At least 6."
+        }
+      },
+      "stores": {
+        "title": "Choose stores",
+        "description": "{count} stores. Choose the ones to follow.",
+        "data": {
+          "stores": "Stores"
+        }
+      }
+    },
+    "error": {
+      "bad_link": "A store link should look like https://matpriskollen.se/butiker/name--id.",
+      "cannot_connect": "Could not read matpriskollen.se. Try again later.",
+      "no_stores": "No stores found. Enter towns or store links.",
+      "no_stores_selected": "Choose at least one store."
+    }
+  },
+  "config_subentries": {
+    "product": {
+      "initiate_flow": {
+        "user": "Add product"
+      },
+      "entry_type": "Product",
+      "step": {
+        "user": {
+          "title": "Add product",
+          "description": "Follow a product in your stores.",
+          "data": {
+            "name": "Product",
+            "max_price": "Max price per item",
+            "notify": "Notify"
+          },
+          "data_description": {
+            "name": "Brand or product name as written in the offer, e.g. Celsius or Nocco.",
+            "max_price": "You get a notification when a store sells it for this or less per item (for example 3 for 36 kr = 12 kr each). Leave empty to be told about every offer.",
+            "notify": "Devices or services that get the notification. Leave empty for no notification."
+          }
+        },
+        "reconfigure": {
+          "title": "{product}",
+          "description": "Change price limit and notifications.",
+          "data": {
+            "name": "Product",
+            "max_price": "Max price per item",
+            "notify": "Notify"
+          },
+          "data_description": {
+            "name": "Brand or product name as written in the offer, e.g. Celsius or Nocco.",
+            "max_price": "You get a notification when a store sells it for this or less per item (for example 3 for 36 kr = 12 kr each). Leave empty to be told about every offer.",
+            "notify": "Devices or services that get the notification. Leave empty for no notification."
+          }
+        }
+      },
+      "error": {
+        "no_name": "Enter a product name.",
+        "already_added": "That product is already added."
+      },
+      "abort": {
+        "reconfigure_successful": "Saved."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "best_price": {
+        "name": "Best price"
+      },
+      "best_offer": {
+        "name": "Best offer"
+      },
+      "last_fetch": {
+        "name": "Last fetch"
+      }
+    },
+    "binary_sensor": {
+      "under_limit": {
+        "name": "Under price limit"
+      }
+    }
+  }
+}

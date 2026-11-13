@@ -1,0 +1,127 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Matpriskollen",
+        "description": "Välj butikerna du vill bevaka. Deras sidor på matpriskollen.se visar veckans erbjudanden och läses högst en gång per uppdateringsintervall. Lägg sedan till varor med **Lägg till vara**.",
+        "data": {
+          "cities": "Orter",
+          "store_links": "Butikslänkar",
+          "update_hours": "Timmar mellan uppdateringar"
+        },
+        "data_description": {
+          "cities": "Skilj med komma, t.ex. Tyresö, Haninge. Alla butiker på orterna visas i nästa steg.",
+          "store_links": "Valfritt. Länkar till butikssidor, t.ex. https://matpriskollen.se/butiker/coop-tyreso--….",
+          "update_hours": "Erbjudandena byts en gång i veckan, så en gång per dygn (24) räcker. Minst 6."
+        }
+      },
+      "stores": {
+        "title": "Välj butiker",
+        "description": "{count} butiker hittades. Välj de du vill bevaka.",
+        "data": {
+          "stores": "Butiker"
+        }
+      }
+    },
+    "error": {
+      "bad_link": "En butikslänk ser ut som https://matpriskollen.se/butiker/namn--id.",
+      "cannot_connect": "Kunde inte läsa matpriskollen.se. Försök igen senare.",
+      "no_stores": "Inga butiker hittades. Skriv orter eller butikslänkar.",
+      "no_stores_selected": "Välj minst en butik."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Matpriskollen",
+        "description": "Ändra hur ofta sidorna läses. Skriv orter eller butikslänkar för att lägga till fler butiker.",
+        "data": {
+          "cities": "Orter",
+          "store_links": "Butikslänkar",
+          "update_hours": "Timmar mellan uppdateringar"
+        },
+        "data_description": {
+          "cities": "Valfritt. Orter, skilda med komma, vars butiker läggs till i listan i nästa steg.",
+          "store_links": "Valfritt. Länkar till butikssidor, t.ex. https://matpriskollen.se/butiker/coop-tyreso--….",
+          "update_hours": "Erbjudandena byts en gång i veckan, så en gång per dygn (24) räcker. Minst 6."
+        }
+      },
+      "stores": {
+        "title": "Välj butiker",
+        "description": "{count} butiker. Välj de du vill bevaka.",
+        "data": {
+          "stores": "Butiker"
+        }
+      }
+    },
+    "error": {
+      "bad_link": "En butikslänk ser ut som https://matpriskollen.se/butiker/namn--id.",
+      "cannot_connect": "Kunde inte läsa matpriskollen.se. Försök igen senare.",
+      "no_stores": "Inga butiker hittades. Skriv orter eller butikslänkar.",
+      "no_stores_selected": "Välj minst en butik."
+    }
+  },
+  "config_subentries": {
+    "product": {
+      "initiate_flow": {
+        "user": "Lägg till vara"
+      },
+      "entry_type": "Vara",
+      "step": {
+        "user": {
+          "title": "Lägg till vara",
+          "description": "Bevaka en vara i dina butiker.",
+          "data": {
+            "name": "Vara",
+            "max_price": "Högsta pris per styck",
+            "notify": "Notis till"
+          },
+          "data_description": {
+            "name": "Märke eller varunamn som det står i erbjudandet, t.ex. Celsius eller Nocco.",
+            "max_price": "Du får en notis när en butik säljer den för det här eller mindre per styck (t.ex. 3 för 36 kr = 12 kr/st). Lämna tomt för att få veta om alla erbjudanden.",
+            "notify": "Enheter eller tjänster som får notisen. Lämna tomt för ingen notis."
+          }
+        },
+        "reconfigure": {
+          "title": "{product}",
+          "description": "Ändra prisgräns och notiser.",
+          "data": {
+            "name": "Vara",
+            "max_price": "Högsta pris per styck",
+            "notify": "Notis till"
+          },
+          "data_description": {
+            "name": "Märke eller varunamn som det står i erbjudandet, t.ex. Celsius eller Nocco.",
+            "max_price": "Du får en notis när en butik säljer den för det här eller mindre per styck (t.ex. 3 för 36 kr = 12 kr/st). Lämna tomt för att få veta om alla erbjudanden.",
+            "notify": "Enheter eller tjänster som får notisen. Lämna tomt för ingen notis."
+          }
+        }
+      },
+      "error": {
+        "no_name": "Skriv ett varunamn.",
+        "already_added": "Den varan finns redan."
+      },
+      "abort": {
+        "reconfigure_successful": "Sparat."
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "best_price": {
+        "name": "Bästa pris"
+      },
+      "best_offer": {
+        "name": "Bästa erbjudande"
+      },
+      "last_fetch": {
+        "name": "Senast hämtad"
+      }
+    },
+    "binary_sensor": {
+      "under_limit": {
+        "name": "Under prisgräns"
+      }
+    }
+  }
+}
