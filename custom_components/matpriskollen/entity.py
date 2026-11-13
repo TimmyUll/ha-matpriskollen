@@ -40,7 +40,6 @@ class ProductEntity(CoordinatorEntity[MatpriskollenCoordinator]):
         self, coordinator: MatpriskollenCoordinator, product: Product, key: str
     ) -> None:
         super().__init__(coordinator)
-        entry = coordinator.config_entry
         self.product = product
         self._attr_translation_key = key
         self._attr_unique_id = f"{product.subentry_id}_{key}"
@@ -50,7 +49,6 @@ class ProductEntity(CoordinatorEntity[MatpriskollenCoordinator]):
             manufacturer="Matpriskollen",
             entry_type=DeviceEntryType.SERVICE,
             sw_version=VERSION,
-            via_device=(DOMAIN, entry.entry_id),
         )
 
     @property

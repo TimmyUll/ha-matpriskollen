@@ -35,6 +35,13 @@
           "max_price": "Du får en notis när en butik säljer den för det här eller mindre per styck (t.ex. 3 för 36 kr = 12 kr/st). Lämna tomt för att få veta om alla erbjudanden.",
           "notify": "Enheter eller tjänster som får notisen. Lämna tomt för ingen notis."
         }
+      },
+      "products_check": {
+        "title": "Kontrollera varor",
+        "description": "Så här ser det ut på dina butikers sidor denna vecka:\n\n{results}\n\nTryck **Bekräfta** för att bli klar, eller ändra namnen för att kontrollera igen.",
+        "data": {
+          "products": "Varor"
+        }
       }
     },
     "error": {
@@ -42,6 +49,9 @@
       "cannot_connect": "Kunde inte läsa matpriskollen.se. Försök igen senare.",
       "no_stores": "Inga butiker hittades. Skriv orter eller butikslänkar.",
       "no_stores_selected": "Välj minst en butik."
+    },
+    "progress": {
+      "fetch": "Läser {count} butikssidor för att kontrollera varorna. Det tar en liten stund, eftersom sidorna läses en i taget."
     }
   },
   "options": {

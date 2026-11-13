@@ -33,7 +33,7 @@ Sista steget i installationen frågar vilka varor du vill bevaka (kommaseparerat
 - **Högsta pris per styck** (valfritt): du får en notis, och *Under prisgräns* slås på, när ett erbjudande kostar detta eller mindre per styck. Mängdpriser som *3 för 36,00* räknas som 12,00 kr/st, flak som *24x33 cl* delas med antalet, och *3 för 2* bredvid ett styckpris räknas som två tredjedelar av det.
 - **Notis till**: telefonerna eller andra notify-tjänster som ska få meddelandet.
 
-När du lägger till en vara kontrolleras den mot veckans sidor för dina butiker. Du ser hur många erbjudanden som finns och det billigaste, eller liknande namn om den inte hittades (t.ex. *Celcius* → *Celsius*).
+Varorna kontrolleras mot veckans sidor för dina butiker, både i installationen och när du lägger till en vara senare. Du ser hur många erbjudanden som finns och det billigaste, eller liknande namn om den inte hittades (t.ex. *Celcius* → *Celsius*).
 
 Pris och notiser ändrar du senare via **⋮** på varan.
 

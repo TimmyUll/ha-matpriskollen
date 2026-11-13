@@ -95,13 +95,30 @@ async def test_config_flow_products_and_sensors(
     assert result["step_id"] == "products"
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        {"products": "Celsius, Nocco, celsius", "max_price": 12.5, "notify": []},
+        {"products": "Celsius, Nocko, celsius", "max_price": 12.5, "notify": []},
+    )
+    assert result["type"] is FlowResultType.SHOW_PROGRESS
+    await hass.async_block_till_done()
+    result = await hass.config_entries.flow.async_configure(result["flow_id"])
+    assert result["step_id"] == "products_check"
+    results = result["description_placeholders"]["results"]
+    assert "**Celsius**: 2 erbjudanden, billigast 12,00 kr/st på Coop Tyresö" in results
+    assert "**Nocko**: hittades inte denna vecka" in results
+    # Fix the spelling and check again, then finish.
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"products": "Celsius, Nocco"}
+    )
+    assert result["step_id"] == "products_check"
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"products": "Celsius, Nocco"}
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"]["stores"] == {COOP: "Coop Tyresö", ICA: "ICA Tyresö"}
     await hass.async_block_till_done()
     entry = hass.config_entries.async_entries(DOMAIN)[0]
     assert sorted(s.title for s in entry.subentries.values()) == ["Celsius", "Nocco"]
+    # The pages read during setup are reused by the first update.
+    assert sum(1 for call in aioclient_mock.mock_calls if COOP in str(call[1])) == 1
     assert hass.states.get("sensor.matpriskollen_last_fetch") is not None
     dup = await _add_product(hass, entry, "celsius")
     assert dup["errors"] == {"name": "already_added"}

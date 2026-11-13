@@ -35,6 +35,13 @@
           "max_price": "You are notified when a store sells it for this or less per item (e.g. 3 for 36 kr = 12 kr each). Leave empty to hear about every offer.",
           "notify": "Devices or services that get the notification. Leave empty for no notification."
         }
+      },
+      "products_check": {
+        "title": "Check products",
+        "description": "This is what the pages of your stores say this week:\n\n{results}\n\nPress **Submit** to finish, or change the names to check again.",
+        "data": {
+          "products": "Products"
+        }
       }
     },
     "error": {
@@ -42,6 +49,9 @@
       "cannot_connect": "Could not read matpriskollen.se. Try again later.",
       "no_stores": "No stores found. Enter towns or store links.",
       "no_stores_selected": "Choose at least one store."
+    },
+    "progress": {
+      "fetch": "Reading {count} store pages to check the products. This takes a little while, since the pages are read one at a time."
     }
   },
   "options": {

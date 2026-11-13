@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 import voluptuous as vol
@@ -26,6 +27,7 @@ from homeassistant.helpers.selector import (
     TextSelector,
     TextSelectorConfig,
 )
+from homeassistant.util import dt as dt_util
 
 from .api import MatpriskollenClient, MatpriskollenError
 from .const import (
@@ -40,9 +42,10 @@ from .const import (
     DEFAULT_UPDATE_HOURS,
     DOMAIN,
     MIN_UPDATE_HOURS,
+    REQUEST_DELAY,
     SUBENTRY_PRODUCT,
 )
-from .coordinator import entry_config
+from .coordinator import Lookup, MatpriskollenData, StoreResult, entry_config
 from .parse import name_from_slug, store_slug
 
 TITLE = "Matpriskollen"
@@ -163,6 +166,21 @@ def _product_data(name: str, user_input: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _lookup_line(name: str, found: Lookup | None) -> str:
+    """One line per product for the check step (Swedish, like the offer texts)."""
+    if found is None:
+        return f"- **{name}**: kunde inte kontrolleras just nu"
+    if found.offers:
+        n = len(found.offers)
+        return f"- **{name}**: {n} erbjudande{'n' if n != 1 else ''}, billigast {found.offers[0].summary}"
+    if found.stores:
+        return f"- **{name}**: finns hos {', '.join(found.stores)}, men utan styckpris"
+    line = f"- **{name}**: hittades inte denna vecka"
+    if found.similar:
+        line += f". Menade du {' eller '.join(found.similar)}?"
+    return line
+
+
 class MatpriskollenConfigFlow(ConfigFlow, domain=DOMAIN):
     """Set up Matpriskollen: choose stores."""
 
@@ -172,6 +190,9 @@ class MatpriskollenConfigFlow(ConfigFlow, domain=DOMAIN):
         self._input: dict[str, Any] = {}
         self._found: dict[str, str] = {}
         self._stores: dict[str, str] = {}
+        self._product_input: dict[str, Any] = {}
+        self._pages: dict[str, StoreResult] = {}
+        self._fetch_task: asyncio.Task | None = None
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -216,24 +237,92 @@ class MatpriskollenConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """First products to follow, comma-separated, with one price limit and notify list."""
         if user_input is not None:
-            names = _cities(user_input.get(CONF_PRODUCTS))
-            return self.async_create_entry(
-                title=TITLE,
-                data={CONF_STORES: self._stores},
-                options={CONF_UPDATE_HOURS: int(self._input[CONF_UPDATE_HOURS])},
-                subentries=[
-                    {
-                        "subentry_type": SUBENTRY_PRODUCT,
-                        "title": name,
-                        "data": _product_data(name, user_input),
-                        "unique_id": None,
-                    }
-                    for name in names
-                ],
-            )
+            self._product_input = user_input
+            if not _cities(user_input.get(CONF_PRODUCTS)):
+                return self._create()
+            return await self.async_step_fetch()
         return self.async_show_form(
             step_id="products",
             data_schema=_product_schema(self.hass, {}, CONF_PRODUCTS),
+        )
+
+    async def async_step_fetch(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Read the chosen store pages once, to check the products against them."""
+        if self._fetch_task is None:
+            self._fetch_task = self.hass.async_create_task(self._async_fetch_pages())
+        if not self._fetch_task.done():
+            return self.async_show_progress(
+                step_id="fetch",
+                progress_action="fetch",
+                progress_task=self._fetch_task,
+                description_placeholders={"count": str(len(self._stores))},
+            )
+        return self.async_show_progress_done(next_step_id="products_check")
+
+    async def _async_fetch_pages(self) -> None:
+        client = MatpriskollenClient(async_get_clientsession(self.hass))
+        for i, (slug, name) in enumerate(self._stores.items()):
+            if i:
+                await asyncio.sleep(REQUEST_DELAY)
+            url = f"https://matpriskollen.se/butiker/{slug}"
+            try:
+                page = await client.async_store_page(slug)
+            except MatpriskollenError:
+                self._pages[slug] = StoreResult(name=name, url=url)
+                continue
+            self._pages[slug] = StoreResult(
+                name=page.name or name,
+                url=url,
+                fetched=dt_util.utcnow(),
+                ok=True,
+                text=page.text,
+            )
+
+    async def async_step_products_check(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Show what the store pages say about each product; edit the names to check again."""
+        names = _cities(self._product_input.get(CONF_PRODUCTS))
+        if user_input is not None:
+            new = _cities(user_input.get(CONF_PRODUCTS))
+            if [n.lower() for n in new] == [n.lower() for n in names]:
+                return self._create()
+            self._product_input = {**self._product_input, CONF_PRODUCTS: ", ".join(new)}
+            names = new
+            if not names:
+                return self._create()
+        data = MatpriskollenData(stores=self._pages, fetched=dt_util.utcnow())
+        lines = [_lookup_line(name, data.lookup(name)) for name in names]
+        return self.async_show_form(
+            step_id="products_check",
+            data_schema=vol.Schema(
+                {vol.Optional(CONF_PRODUCTS, default=", ".join(names)): TextSelector()}
+            ),
+            description_placeholders={"results": "\n".join(lines)},
+            last_step=True,
+        )
+
+    def _create(self) -> ConfigFlowResult:
+        names = _cities(self._product_input.get(CONF_PRODUCTS))
+        if self._pages and any(p.ok for p in self._pages.values()):
+            # Let the first update use these pages instead of reading them again.
+            prefetch = self.hass.data.setdefault(DOMAIN, {}).setdefault("prefetch", {})
+            prefetch[frozenset(self._stores)] = self._pages
+        return self.async_create_entry(
+            title=TITLE,
+            data={CONF_STORES: self._stores},
+            options={CONF_UPDATE_HOURS: int(self._input[CONF_UPDATE_HOURS])},
+            subentries=[
+                {
+                    "subentry_type": SUBENTRY_PRODUCT,
+                    "title": name,
+                    "data": _product_data(name, self._product_input),
+                    "unique_id": None,
+                }
+                for name in names
+            ],
         )
 
     @staticmethod

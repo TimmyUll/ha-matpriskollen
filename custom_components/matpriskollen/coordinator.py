@@ -241,6 +241,26 @@ class MatpriskollenCoordinator(DataUpdateCoordinator[MatpriskollenData]):
                 await self._save(cached)
                 return cached
 
+            prefetch = self.hass.data.get(DOMAIN, {}).get("prefetch", {})
+            if pages := prefetch.pop(frozenset(self.stores), None):
+                # Pages just read while setting up: use them instead of reading again.
+                names = self.product_names
+                stores = {
+                    slug: StoreResult(
+                        name=s.name,
+                        url=s.url,
+                        offers={p: find_offers(s.text, p) for p in names},
+                        fetched=s.fetched,
+                        ok=s.ok,
+                        text=s.text,
+                    )
+                    for slug, s in pages.items()
+                }
+                data = MatpriskollenData(stores=stores, fetched=dt_util.utcnow())
+                await self._async_notify(data)
+                await self._save(data)
+                return data
+
         previous = self.data.stores if self.data else {}
         names = self.product_names
         stores: dict[str, StoreResult] = {}

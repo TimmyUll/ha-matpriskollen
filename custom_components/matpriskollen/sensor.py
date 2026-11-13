@@ -24,6 +24,8 @@ async def async_setup_entry(
     coordinator: MatpriskollenCoordinator = entry.runtime_data
     async_add_entities([LastFetchSensor(coordinator)])
     for product in coordinator.products:
+        if product.subentry_id not in entry.subentries:
+            continue  # Removed while the entry was loading; a reload follows.
         async_add_entities(
             [
                 BestPriceSensor(coordinator, product),
